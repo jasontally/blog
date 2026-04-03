@@ -21,6 +21,7 @@ export default defineConfig({
 			plugins: [formsPlugin()],
 			sandboxed: [webhookNotifierPlugin()],
 			sandboxRunner: sandbox(),
+			mcp: true,
 			marketplace: "https://marketplace.emdashcms.com",
 		}),
 	],
