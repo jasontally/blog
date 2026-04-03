@@ -8,14 +8,17 @@ export const GET: APIRoute = async ({ site, url }) => {
 	const siteUrl = site?.toString() || url.origin;
 
 	const { entries: posts } = await getEmDashCollection("posts", {
-		orderBy: { published_at: "desc" },
+		orderBy: { pub_date: "desc" },
 		limit: 20,
 	});
 
 	const items = posts
 		.map((post) => {
-			if (!post.data.publishedAt) return null;
-			const pubDate = post.data.publishedAt.toUTCString();
+			const displayDate = post.data.mod_date && post.data.mod_date > post.data.pub_date
+				? post.data.mod_date
+				: post.data.pub_date;
+			if (!displayDate) return null;
+			const pubDate = displayDate.toUTCString();
 
 			const postUrl = `${siteUrl}/posts/${post.id}`;
 			const title = escapeXml(post.data.title || "Untitled");

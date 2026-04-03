@@ -10,8 +10,8 @@ const { entries: posts, cacheHint } = await getEmDashCollection("posts");
 Astro.cache.set(cacheHint);
 
 const sortedPosts = posts.toSorted((a, b) => {
-	const dateA = a.data.publishedAt?.getTime() ?? 0;
-	const dateB = b.data.publishedAt?.getTime() ?? 0;
+	const dateA = a.data.pub_date?.getTime() ?? 0;
+	const dateB = b.data.pub_date?.getTime() ?? 0;
 	return dateB - dateA;
 });
 
@@ -47,7 +47,13 @@ const gridPostsWithTags = await Promise.all(
 	})
 );
 
-// Format date helper
+// Format date helper - uses mod_date if later than pub_date, otherwise pub_date
+function getDisplayDate(post: any): Date | null {
+	const pub = post.data.pub_date;
+	const mod = post.data.mod_date;
+	return (mod && mod > pub) ? mod : pub;
+}
+
 function formatDate(date: Date | null | undefined) {
 	if (!date) return null;
 	return date.toLocaleDateString("en-US", {
@@ -110,8 +116,8 @@ function formatDate(date: Date | null | undefined) {
 											<span class="meta-dot" />
 										</>
 									)}
-									{formatDate(featuredPost.data.publishedAt) && (
-										<time>{formatDate(featuredPost.data.publishedAt)}</time>
+									{formatDate(getDisplayDate(featuredPost)) && (
+										<time>{formatDate(getDisplayDate(featuredPost))}</time>
 									)}
 									<span class="meta-dot" />
 									<span>
@@ -159,7 +165,7 @@ function formatDate(date: Date | null | undefined) {
 									excerpt={post.data.excerpt}
 									featuredImage={post.data.featured_image}
 									href={`/posts/${post.id}`}
-									date={post.data.publishedAt ?? undefined}
+									date={getDisplayDate(post) ?? undefined}
 									readingTime={getReadingTime(post.data.content)}
 									tags={tags}
 									bylines={bylines}
